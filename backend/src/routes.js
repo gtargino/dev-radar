@@ -1,4 +1,7 @@
 const { Router } = require('express');
+const axios = require('axios');
+const Dev = require('./models/Dev');
+
 const routes = Router();
 
 // Param types //
@@ -14,8 +17,28 @@ const routes = Router();
 // });
 
 // Body: req.body.name (to create/change registry and more)
-routes.post('/users/', (req,res) => {
-    return res.json({message: `This is a request (with body)! By: ${ req.body.name }`});
+// routes.post('/users/', (req,res) => {
+//     return res.json({message: `This is a request (with body)! By: ${ req.body.name }`});
+// });
+
+
+routes.post('/devs', async (req,res) => {
+    const { github_username, techs } = req.body;
+
+    const techList = techs.split(',').map(tech => tech.trim());
+    
+    const apiResponse = await axios.get(`https://api.github.com/users/${ github_username }`);
+    const { name = login, avatar_url, bio } = apiResponse.data;
+
+    const dev = await Dev.create({
+        github_username,
+        name,
+        avatar_url,
+        bio,
+        techs: techList,
+    });
+
+    return res.json({dev});
 });
 
 module.exports = routes;
