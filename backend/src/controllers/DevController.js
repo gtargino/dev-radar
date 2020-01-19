@@ -2,7 +2,15 @@ const axios = require('axios');
 const Dev = require('../models/Dev');
 
 module.exports = {
-    async store (req,res) {
+
+    // index, show, store, update, destroy
+    async index (req, res) {
+        const devs = await Dev.find();
+        
+        return res.json(devs);
+    },
+
+    async store (req, res) {
         const { github_username, techs, latitude, longitude } = req.body;
 
         let dev = await Dev.findOne({ github_username });
