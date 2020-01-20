@@ -17,25 +17,27 @@ module.exports = {
 
         let dev = await Dev.findOne({ github_username });
 
-        if(!dev) {        
-            const apiResponse = await axios.get(`https://api.github.com/users/${ github_username }`);
-            const { name = login, avatar_url, bio } = apiResponse.data;
-            const techList = parseStringAsArray(techs);
-
-            const location = {
-                type: 'Point',
-                coordinates: [longitude, latitude],
-            };
-
-            dev = await Dev.create({
-                github_username,
-                name,
-                avatar_url,
-                bio,
-                techs: techList,
-                location
-            });
+        if (dev) {
+            return res.status(400).json( { error: `User '${github_username}' already exists.`} )
         }
+        
+        const apiResponse = await axios.get(`https://api.github.com/users/${ github_username }`);
+        const { name = login, avatar_url, bio } = apiResponse.data;
+        const techList = parseStringAsArray(techs);
+
+        const location = {
+            type: 'Point',
+            coordinates: [longitude, latitude],
+        };
+
+        dev = await Dev.create({
+            github_username,
+            name,
+            avatar_url,
+            bio,
+            techs: techList,
+            location
+        });
 
         return res.json({dev});
     },
@@ -64,6 +66,15 @@ module.exports = {
     },
 
     async delete (req, res) {
+        const github_username = req.params.user;
 
+        let dev = await Dev.findOne({ github_username });
+
+        if (!dev) {
+            return res.status(400).json( { message: `User '${github_username}' not found.` } );
+        }
+
+        await Dev.deleteOne( { github_username } );
+        return res.json({ message: `User '${github_username}' was deleted.`});
     }
 };
