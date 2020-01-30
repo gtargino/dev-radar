@@ -39,7 +39,7 @@ module.exports = {
             location
         });
 
-        return res.json({dev});
+        return res.json(dev);
     },
 
     async update (req, res) {
@@ -59,7 +59,7 @@ module.exports = {
                 coordinates: req.body.coordinates
             },
         });
-
+        
         dev = await Dev.findOne({ github_username });
     
         return res.json({ dev });
