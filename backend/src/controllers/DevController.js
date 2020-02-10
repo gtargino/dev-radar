@@ -20,9 +20,19 @@ module.exports = {
         if (dev) {
             return res.status(400).json( { error: `User '${github_username}' already exists.`} )
         }
-        
-        const apiResponse = await axios.get(`https://api.github.com/users/${ github_username }`);
-        const { name = login, avatar_url, bio } = apiResponse.data;
+
+        try {
+            var apiResponse = await axios.get(`https://api.github.com/users/${ github_username }`);
+        } catch {
+            return res.json(`Something is wrong! Check if '${github_username}' really.`);
+        }
+
+        var { name, avatar_url, bio } = apiResponse.data;
+
+        if (!name) {
+            name = github_username;
+        }
+
         const techList = parseStringAsArray(techs);
 
         const location = {
